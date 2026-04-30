@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Freedom of Speech — protocol demo</title>
+    <meta
+      name="description"
+      content="One human, one account. No platform bans. Decentralized comments anchored on Base."
+    />
+    <link rel="icon" href="data:," />
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: oklch(13% 0 0);
+        --fg: oklch(96% 0 0);
+        --muted: oklch(60% 0 0);
+        --accent: oklch(72% 0.18 250);
+        --line: oklch(20% 0 0);
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        background: var(--bg);
+        color: var(--fg);
+        line-height: 1.55;
+      }
+      a { color: var(--accent); text-decoration: none; }
+      a:hover { text-decoration: underline; }
+      main { max-width: 880px; margin: 0 auto; padding: 64px 24px 96px; }
+      header.hero {
+        display: grid;
+        gap: 16px;
+        margin-bottom: 56px;
+        padding-bottom: 40px;
+        border-bottom: 1px solid var(--line);
+      }
+      h1 {
+        font-size: clamp(2rem, 1.4rem + 3vw, 3.4rem);
+        line-height: 1.05;
+        margin: 0;
+        letter-spacing: -0.02em;
+        font-weight: 700;
+      }
+      h1 em {
+        font-style: normal;
+        background: linear-gradient(120deg, oklch(72% 0.18 250), oklch(80% 0.18 320));
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
+      .lede {
+        font-size: 1.125rem;
+        color: var(--muted);
+        max-width: 60ch;
+      }
+      .pillrow {
+        display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+      }
+      .pill {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--muted);
+        border: 1px solid var(--line);
+        padding: 6px 10px;
+        border-radius: 999px;
+      }
+      section { margin: 48px 0; }
+      section h2 {
+        font-size: 1.4rem; margin: 0 0 16px;
+        letter-spacing: -0.01em;
+      }
+      .feature-grid {
+        display: grid;
+        gap: 16px;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      }
+      .feature {
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 16px;
+        background: oklch(15% 0 0);
+      }
+      .feature h3 { margin: 0 0 6px; font-size: 0.95rem; }
+      .feature p { margin: 0; color: var(--muted); font-size: 0.9rem; }
+      .demo-card {
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        padding: 24px;
+        background: oklch(15% 0 0);
+      }
+      .demo-card h2 { margin-top: 0; }
+      .demo-host {
+        margin-top: 16px;
+      }
+      footer {
+        margin-top: 80px; padding-top: 24px;
+        border-top: 1px solid var(--line);
+        font-size: 0.85rem; color: var(--muted);
+        display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+      }
+      code, pre {
+        font-family: ui-monospace, 'JetBrains Mono', 'Fira Code', monospace;
+        font-size: 0.85rem;
+      }
+      pre {
+        background: oklch(10% 0 0);
+        padding: 12px 14px;
+        border-radius: 10px;
+        border: 1px solid var(--line);
+        overflow-x: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header class="hero">
+        <h1>Comments that <em>nobody can delete</em>.</h1>
+        <p class="lede">
+          A browser extension and embed protocol that layers decentralized comments on top of any
+          page on the internet. One human, one account, anchored to a biometric — no platform
+          bans, mute and block live on your device.
+        </p>
+        <div class="pillrow">
+          <span class="pill">Base L2</span>
+          <span class="pill">WebAuthn</span>
+          <span class="pill">Semaphore ZK</span>
+          <span class="pill">IPFS / Arweave</span>
+          <span class="pill">MIT</span>
+        </div>
+      </header>
+
+      <section>
+        <h2>Why bother</h2>
+        <div class="feature-grid">
+          <article class="feature">
+            <h3>No platform bans</h3>
+            <p>The protocol has no admin role and no delete primitive. Removing a comment is not a button anyone can press.</p>
+          </article>
+          <article class="feature">
+            <h3>Bot-free reviews</h3>
+            <p>Every account is a verified human via WebAuthn + Semaphore proof of group membership.</p>
+          </article>
+          <article class="feature">
+            <h3>Mute is yours</h3>
+            <p>Block lists are client-side. Optionally publish them on-chain so they travel between your devices and clients.</p>
+          </article>
+          <article class="feature">
+            <h3>Permanent</h3>
+            <p>Comments live on IPFS, anchored on Base, archived to Arweave. There is no host that can vanish.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="demo-card">
+        <h2>SDK demo</h2>
+        <p class="lede">
+          Drop-in embed any site can ship. Zero runtime dependencies, ~5KB minified. The
+          fixture below points at a non-existent indexer endpoint, so you'll see the
+          "could not load" path — that's the unhappy state working as designed.
+        </p>
+        <pre>&lt;div id="fos-comments"&gt;&lt;/div&gt;
+&lt;script src="/sdk.js" data-target="#fos-comments" data-theme="auto"&gt;&lt;/script&gt;</pre>
+        <div id="fos-comments" class="demo-host"></div>
+      </section>
+
+      <section>
+        <h2>Run it locally</h2>
+        <pre>git clone https://github.com/Freedom-Guda/freedom-of-speech.git
+cd freedom-of-speech
+pnpm install
+pnpm --filter @fos/contracts demo:inline   # full E2E in Hardhat memory
+pnpm --filter @fos/extension build         # then load .output/chrome-mv3 in Chrome
+pnpm --filter @fos/web dev                 # this page, hot-reload</pre>
+      </section>
+
+      <footer>
+        <span>MIT licensed. Comments are forever.</span>
+        <span><a href="https://github.com/Freedom-Guda/freedom-of-speech">github</a></span>
+      </footer>
+    </main>
+
+    <script type="module">
+      import { init } from '@fos/sdk';
+      init({
+        container: '#fos-comments',
+        url: 'https://example.com/freedom-of-speech-demo',
+        theme: 'dark',
+        // Intentionally invalid endpoint — the goal is to see the empty/error
+        // path render correctly. Swap in a real subgraph URL once deployed.
+        indexerUrl: '/__no_indexer_yet__',
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,22 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :host,
+  :root {
+    color-scheme: dark light;
+  }
+
+  /* Inside the shadow root we want a hard reset so host CSS cannot bleed in. */
+  :host {
+    all: initial;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  .fos-overlay {
+    /* Ensure pointer-events behave normally inside the shadow root despite
+       the `all: initial` reset above. */
+    pointer-events: auto;
+  }
+}

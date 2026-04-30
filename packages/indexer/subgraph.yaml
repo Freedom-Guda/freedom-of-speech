@@ -1,0 +1,53 @@
+specVersion: 1.0.0
+description: Freedom of Speech — decentralized comment protocol indexer
+schema:
+  file: ./schema.graphql
+features:
+  - nonFatalErrors
+dataSources:
+  - kind: ethereum/contract
+    name: FreedomOfSpeech
+    network: base-sepolia
+    source:
+      address: "0x0000000000000000000000000000000000000000"
+      abi: FreedomOfSpeech
+      startBlock: 0
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      file: ./src/freedomOfSpeech.ts
+      entities:
+        - VerifiedHuman
+        - Thread
+        - Comment
+      abis:
+        - name: FreedomOfSpeech
+          file: ../contracts/artifacts/contracts/FreedomOfSpeech.sol/FreedomOfSpeech.json
+      eventHandlers:
+        - event: HumanVerified(indexed string,indexed address,uint256)
+          handler: handleHumanVerified
+        - event: CommentPosted(indexed bytes32,indexed bytes32,string,string,bytes32,uint256)
+          handler: handleCommentPosted
+  - kind: ethereum/contract
+    name: SocialGraph
+    network: base-sepolia
+    source:
+      address: "0x0000000000000000000000000000000000000000"
+      abi: SocialGraph
+      startBlock: 0
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      file: ./src/socialGraph.ts
+      entities:
+        - Block
+      abis:
+        - name: SocialGraph
+          file: ../contracts/artifacts/contracts/SocialGraph.sol/SocialGraph.json
+      eventHandlers:
+        - event: Blocked(indexed string,indexed string,uint256)
+          handler: handleBlocked
+        - event: Unblocked(indexed string,indexed string,uint256)
+          handler: handleUnblocked

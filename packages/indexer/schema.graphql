@@ -1,0 +1,34 @@
+type VerifiedHuman @entity(immutable: false) {
+  id: ID! # the DID
+  did: String!
+  signer: Bytes!
+  verifiedAt: BigInt!
+  comments: [Comment!]! @derivedFrom(field: "author")
+}
+
+type Thread @entity(immutable: false) {
+  id: Bytes! # urlHash
+  url: String # populated by the relay when it learns the canonical URL
+  commentCount: BigInt!
+  firstSeenAt: BigInt!
+  comments: [Comment!]! @derivedFrom(field: "thread")
+}
+
+type Comment @entity(immutable: true) {
+  id: Bytes! # commentId
+  thread: Thread!
+  author: VerifiedHuman!
+  cid: String!
+  parent: Comment
+  timestamp: BigInt!
+  txHash: Bytes!
+  blockNumber: BigInt!
+}
+
+type Block @entity(immutable: false) {
+  id: ID! # blockerDid:blockedDid
+  blocker: String!
+  blockedDid: String!
+  active: Boolean!
+  updatedAt: BigInt!
+}

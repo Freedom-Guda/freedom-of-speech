@@ -1,0 +1,24 @@
+{
+  "name": "@fos/indexer",
+  "version": "0.0.1",
+  "private": true,
+  "description": "The Graph subgraph + Cloudflare Worker relay cache",
+  "scripts": {
+    "codegen": "graph codegen",
+    "build": "echo 'subgraph build runs after contract deploy — see README'",
+    "build:graph": "graph codegen && graph build",
+    "deploy:studio": "graph deploy --studio fos-base-sepolia",
+    "deploy:hosted": "echo 'hosted-service is deprecated; use studio'",
+    "test": "echo 'subgraph tests use matchstick — run pnpm test:matchstick when binaries are installed'",
+    "test:matchstick": "graph test",
+    "typecheck": "echo 'subgraph mappings use AssemblyScript via graph codegen'",
+    "lint": "echo 'lint not yet configured'"
+  },
+  "dependencies": {
+    "@graphprotocol/graph-cli": "^0.95.0",
+    "@graphprotocol/graph-ts": "^0.36.0"
+  },
+  "devDependencies": {
+    "matchstick-as": "^0.6.0"
+  }
+}
