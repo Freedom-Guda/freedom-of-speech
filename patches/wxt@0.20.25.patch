@@ -1,0 +1,124 @@
+diff --git a/dist/core/builders/vite/plugins/download.mjs b/dist/core/builders/vite/plugins/download.mjs
+index cee3b8e5f5690542fa7f1a8279de338bea9d6f87..fe47ed3b6bf7ea6f1f4edfd7ea065f080ad9062b 100644
+--- a/dist/core/builders/vite/plugins/download.mjs
++++ b/dist/core/builders/vite/plugins/download.mjs
+@@ -1,30 +1,24 @@
+ import { fetchCached } from "../../../utils/network.mjs";
+-//#region src/core/builders/vite/plugins/download.ts
+-/**
+-* Downloads any URL imports, like Google Analytics, into virtual modules so
+-* they are bundled with the extension instead of depending on remote code at
+-* runtime.
+-*
+-* @example
+-*   import 'url:https://google-tagmanager.com/gtag?id=XYZ';
+-*/
++const URL_RE = /^url:https?:\/\//i;
++const RESOLVED_RE = /^\x00url:https?:\/\//i;
+ function download(config) {
+-	return {
+-		name: "wxt:download",
+-		enforce: "pre",
+-		resolveId: {
+-			filter: { id: /^url:/ },
+-			handler(id) {
+-				return `\0${id}`;
+-			}
+-		},
+-		load: {
+-			filter: { id: /^\x00url:/ },
+-			handler(id) {
+-				return fetchCached(id.replace("\0url:", ""), config);
+-			}
+-		}
+-	};
++  return {
++    name: "wxt:download",
++    enforce: "pre",
++    resolveId: {
++      filter: { id: /^url:/ },
++      handler(id) {
++        if (typeof id !== "string" || !URL_RE.test(id)) return null;
++        return `\0${id}`;
++      }
++    },
++    load: {
++      filter: { id: /^\x00url:/ },
++      handler(id) {
++        if (typeof id !== "string" || !RESOLVED_RE.test(id)) return null;
++        return fetchCached(id.replace("\0url:", ""), config);
++      }
++    }
++  };
+ }
+-//#endregion
+ export { download };
+diff --git a/dist/core/utils/network.mjs b/dist/core/utils/network.mjs
+index 0ba02d977a751d6c9e211e614fb608d9b80f05f5..15420529b1be7bd86f001970fd8bf0f90c74aa80 100644
+--- a/dist/core/utils/network.mjs
++++ b/dist/core/utils/network.mjs
+@@ -1,36 +1,36 @@
+ import { withTimeout } from "./time.mjs";
+ import dns from "node:dns";
+ import consola from "consola";
+-//#region src/core/utils/network.ts
+ async function isOffline() {
+-	try {
+-		return await withTimeout(new Promise((res) => {
+-			dns.resolve("google.com", (err) => res(err != null));
+-		}), 1e3);
+-	} catch (error) {
+-		consola.error("Error checking offline status:", error);
+-		return true;
+-	}
++  try {
++    return await withTimeout(new Promise((res) => {
++      dns.lookup("google.com", (err) => res(err != null));
++    }), 1e3);
++  } catch (error) {
++    consola.error("Error checking offline status:", error);
++    return true;
++  }
+ }
+-async function isOnline() {
+-	return !await isOffline();
+-}
+-/**
+-* Fetches a URL with a simple GET request. Grabs it from cache if it doesn't
+-* exist, or throws an error if it can't be resolved via the network or cache.
+-*/
++async function isOnline() { return !(await isOffline()); }
+ async function fetchCached(url, config) {
+-	let content = "";
+-	if (await isOnline()) {
+-		const res = await fetch(url);
+-		if (res.status < 300) {
+-			content = await res.text();
+-			await config.fsCache.set(url, content);
+-		} else config.logger.debug(`Failed to download "${url}", falling back to cache...`);
+-	}
+-	if (!content) content = await config.fsCache.get(url) ?? "";
+-	if (!content) throw Error(`Offline and "${url}" has not been cached. Try again when online.`);
+-	return content;
++  if (typeof url !== "string" || !/^https?:\/\//i.test(url)) {
++    // Defense-in-depth: vite-node has been observed routing non-URL ids
++    // through this plugin's load path. Return null so vite falls through
++    // to the next loader instead of throwing "Invalid URL".
++    return null;
++  }
++  let content = "";
++  if (await isOnline()) {
++    try {
++      const res = await fetch(url);
++      if (res.status < 300) {
++        content = await res.text();
++        await config.fsCache.set(url, content);
++      } else config.logger.debug(`Failed to download "${url}", falling back to cache...`);
++    } catch (e) { config.logger.debug(`Network error fetching "${url}"`); }
++  }
++  if (!content) content = await config.fsCache.get(url) ?? "";
++  if (!content) throw Error(`Offline and "${url}" has not been cached. Try again when online.`);
++  return content;
+ }
+-//#endregion
+ export { fetchCached };
